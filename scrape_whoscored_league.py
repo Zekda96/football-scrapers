@@ -1,42 +1,50 @@
 # Get WhoScored event data for a whole season
 import soccerdata as sd
-import os
-import pandas as pd
-import json
 
 league = 'ENG-Premier League'
-season = '2324'  # Season as 22/23
+# league = 'ESP-La Liga'
+# league = 'GER-Bundesliga'
+# league =  'ITA-Serie A'
+# league =  'FRA-Ligue 1'
+# league = 'INT-Women's World Cup'
+# league = 'INT-World Cup'
+# league = ['ENG-Premier League',
+#           'ESP-La Liga',
+#           'GER-Bundesliga',
+#           'ITA-Serie A',
+#           'FRA-Ligue 1'
+#           ]
 
-# Read season
-print('Reading season - ')
-ws = sd.WhoScored(leagues=league, seasons=f'{season}')
-schedule = ws.read_schedule()
+# season = '21-22'
+season = '22-23'
+# season = '23-24'
 
-# Get matches id from cached season file
-season_fp = f'/Users/dgranja/soccerdata/data/WhoScored/matches/{league}_{season}.csv'
-season_csv = pd.read_csv(season_fp)
-games_id = season_csv['game_id'].unique().tolist()
+ws = sd.WhoScored(leagues=league, seasons=season)
+# ws = sd.WhoScored(leagues=league, seasons=season,
+#                   no_cache=True,
+#                   no_store=True,
+#                   headless=True)
 
+schedule = ws.read_schedule(force_cache=True)
+# schedule = ws.read_schedule()
+matchs_no = len(schedule)
 
-# Filepath for CSV of matches
-dir_fp = os.path.join('/Users/dgranja/PycharmProjects/dash-app', league, season)
-os.makedirs(dir_fp, exist_ok=True)
+# --------------------------- Uncomment either
+# match_id = 1729468
+match_id = ''
 
-# Create/Open league csv file
-season_fp = f'{os.path.join(dir_fp, season)}_20240131.csv'
-open(season_fp, 'a')
+if match_id != '':
+    # Load one match
+    events = ws.read_events(match_id=1729468, force_cache=True)
+if match_id == '':
+    # Loop to load season
+    for i in range(matchs_no):
+        percent = (i + 1) / matchs_no * 100
+        print(f'Reading match Number {i + 1}/380 - {round(percent, 2)} %')
+        # Events get saved on "~/soccerdata/data/WhoScored" automatically
+        events = ws.read_events(
+            match_id=int(schedule.iloc[[i]].game_id.values[0]),
+            force_cache=True
+        )
+        print('Got match event data\nSaving to list...')
 
-events_list = []
-for i, match in enumerate(games_id):
-    # Scrape
-    percent = (i+1)/380 * 100
-    print(f'Reading match Number {i+1}/380 - {round(percent,2)} %')
-    events = ws.read_events(match_id=match)
-    print('Got match event data\nSaving to list...')
-    # Save to list
-    events_list.append(events)
-
-print('Saving file...')
-league = pd.concat(events_list, ignore_index=True)
-league.to_csv(season_fp)
-print(f'Saved to {season_fp}')
