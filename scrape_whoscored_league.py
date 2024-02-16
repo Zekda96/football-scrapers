@@ -26,7 +26,7 @@ ws = sd.WhoScored(leagues=league, seasons=season)
 #                   headless=True)
 
 schedule = ws.read_schedule()
-# schedule = ws.read_schedule()
+# schedule = ws.read_schedule(force_cache=True)
 matchs_no = len(schedule)
 
 # --------------------------- Uncomment either
@@ -40,3 +40,5 @@ if match_id == '':
 else:
     # Load one match
     events = ws.read_events(match_id=int(match_id))
+
+events.to_csv(f"{league}_{season.replace('-', '')}.csv")
