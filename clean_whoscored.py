@@ -1,4 +1,5 @@
 import pandas as pd
+import ast
 
 fp = 'data/WhoScored/ITA-Serie A_2324.csv'
 
@@ -82,6 +83,43 @@ df = df[df['type'].isin([
 )
 ]
 
+# Now that we got all the rows we want, lets reset the index
+df.reset_index(drop=True, inplace=True)
+
+
+# Add relevant qualifiers as new columns (Length and angle)
+lengths = []
+angles = []
+for idx, row in df.iterrows():
+    if (idx % 10000) == 0:
+        print(f"{round(idx/len(df) * 100, 1)}% - Scanning qualifiers")
+    # Get qualifiers as list of JSON
+    qual = ast.literal_eval(row.qualifiers.replace('\'', '"'))
+    # Flags to fill w 0 if event doesn't have length or angle,
+    has_length = False
+    has_angle = False
+    # List of qualifiers. Search for length or angle
+    for q in qual:
+        if q['type']['displayName'] == 'Length':
+            l_val = q['value']
+            lengths.append(float(l_val))
+            has_length = True  # Flag
+
+        elif q['type']['displayName'] == 'Angle':
+            a_val = q['value']
+            angles.append(float(a_val))
+            has_angle = True  # Flag
+
+    if not has_length:
+        lengths.append(0.0)
+
+    if not has_angle:
+        angles.append(0.0)
+
+df.insert(21, 'length', lengths)
+df.insert(22, 'angle', angles)
+
+
 # Now to choose columns
 df = df[
     [
@@ -91,6 +129,7 @@ df = df[
         'type', 'outcome_type',
         'team', 'player',
         'x', 'y', 'end_x', 'end_y',
+        'length', 'angle',
         'goal_mouth_y', 'goal_mouth_z', 'blocked_x', 'blocked_y',
         'is_shot', 'is_goal',
     ]
