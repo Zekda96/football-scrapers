@@ -5,6 +5,9 @@ def clean_df(dataframe: pd.DataFrame):
     """
     Cleans the dataframe, declares datatypes and adds audit columns.
     """
+
+    pd.set_option('future.no_silent_downcasting', True)
+
     # Reset index
     df = dataframe.reset_index()
     cols = df['game'].str.split(' ', n=1, expand=True)
@@ -22,15 +25,20 @@ def clean_df(dataframe: pd.DataFrame):
     # Fill Booleans
     bool_columns = ["is_touch", "is_shot", "is_goal"]
     for col in bool_columns:
-        df[col] = df[col].astype(bool).fillna(False)
+        df[col] = df[col].fillna(False).astype(bool)
+
 
     # Add PK to df
+    df = df.reset_index()
+    df = df.rename(columns={'index': 'match_event_id'})
+
     df['PK'] = df['league'].astype(str) + \
     df['season'].astype(str) + \
     df['date'].astype(str) + \
     df['home'].astype(str) + \
     df['away'].astype(str) + \
     df['game_id'].astype(str) + \
+    df['match_event_id'].astype(str) + \
     df['team_id'].astype(str) + \
     df['team'].astype(str) + \
     df['period'].astype(str) + \
