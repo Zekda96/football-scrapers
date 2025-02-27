@@ -1,1 +1,5 @@
+soccerdata == 1.8.7
 supabase == 2.13.0
+pyspark == 3.5.4
+delta-spark == 3.3.0
+numpy == 1.26.4
