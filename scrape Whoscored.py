@@ -33,6 +33,17 @@ while 1:
 
     missing = [id for id in available_games if id not in cached_games]
 
+    filename = 'cached_games.txt'
+    cached_games.append(missing[0])
+    # Open the file in write mode
+    with open(filename, 'w') as file:
+        for item in cached_games:
+            file.write(f"{item}\n")
+
+    # Read it back this way:
+    # with open(filename, 'r') as file:
+    #   loaded_list = [line.strip() for line in file]
+            
     print(f"Games missing: {len(missing)}")
 
     print(f"Match id to scrape: {missing[0]}")
@@ -40,7 +51,7 @@ while 1:
     events = ws.read_events(match_id=missing[0])
     print(events.head())
 
-        # Look for shots and goals for QA
+    # Look for shots and goals for QA
     df = events[['team', 'minute', 'player', 'is_shot','is_goal']]
     teams = df["team"].unique()
 
