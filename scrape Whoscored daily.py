@@ -40,10 +40,10 @@ if missing:
     df = events[['team', 'minute', 'player', 'is_shot','is_goal']]
     teams = df["team"].unique()
 
-    df = df[df['is_shot'] == True]
+    shots = df[df['is_shot'] == True]
     goals = df[df['is_goal'] == True]
     for team in teams:
-        logging.info(f"Shots for {team}: {len(df[df['team'] == team])}")
+        logging.info(f"Shots for {team}: {len(shots[shots['team'] == team])}")
         logging.info(f"Goals for {team}: {len(goals[goals['team'] == team])}\n")
     
     logging.info(df)
