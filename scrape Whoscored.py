@@ -1,5 +1,6 @@
 import soccerdata as sd
 import os
+import logging
 from time import sleep
 from datetime import datetime, timedelta
 
@@ -38,6 +39,18 @@ while 1:
 
     events = ws.read_events(match_id=missing[0])
     print(events.head())
+
+        # Look for shots and goals for QA
+    df = events[['team', 'minute', 'player', 'is_shot','is_goal']]
+    teams = df["team"].unique()
+
+    shots = df[df['is_shot'] == True]
+    goals = df[df['is_goal'] == True]
+    for team in teams:
+        logging.info(f"Shots for {team}: {len(shots[shots['team'] == team])}")
+        logging.info(f"Goals for {team}: {len(goals[goals['team'] == team])}\n")
+
+    logging.info(df)
 
     print(f"Next run at {datetime.now() + timedelta(seconds=wait_time)}")
     sleep(wait_time)
